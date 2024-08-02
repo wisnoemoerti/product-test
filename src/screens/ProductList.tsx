@@ -23,15 +23,16 @@ interface Product {
 const ProductList: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
+  const [skip, setSkip] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [limit] = useState<number>(10); // Define the limit of items per page
   const navigation = useNavigation();
 
   const fetchProducts = useCallback(async () => {
     setIsFetching(true);
     try {
       const response = await axios.get(
-        `https://dummyjson.com/products?limit=10&page=${page}`,
+        `https://dummyjson.com/products?limit=${limit}&skip=${skip}`,
       );
       setProducts(prevProducts => [...prevProducts, ...response.data.products]);
     } catch (error) {
@@ -39,7 +40,7 @@ const ProductList: React.FC = () => {
     }
     setIsFetching(false);
     setLoading(false);
-  }, [page]);
+  }, [skip, limit]);
 
   useEffect(() => {
     fetchProducts();
@@ -89,9 +90,9 @@ const ProductList: React.FC = () => {
 
   const handleLoadMore = useCallback(() => {
     if (!isFetching) {
-      setPage(prevPage => prevPage + 1);
+      setSkip(prevSkip => prevSkip + limit);
     }
-  }, [isFetching]);
+  }, [isFetching, limit]);
 
   return (
     <View style={styles.container}>
